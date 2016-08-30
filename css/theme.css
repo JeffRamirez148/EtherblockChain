@@ -2,21 +2,64 @@ body {
 }
 
 .top {
+	height: 300px;
 }
 
 .middle {
+	height: 300px;
 }
 
 .bottom {
 }
 
 .left {
+	width:20%;
+	float:left;
+	position: relative;
 }
 
 .center {
+	width:20%;
+	float:left;
+	position: relative;
 }
 
 .right {
+	width:20%;
+	float:left;
+	position: relative;
+}
+
+.block {
+	left: 15px;
+	position: relative;
+	padding: 10px;
+	border-style: solid;
+	border-width: 2px;
+	background-color: lightgrey;
+	width:200px;
+	height:200px;
+}
+
+.pendingBlock {
+	left: 15px;
+	position: relative;
+	padding: 10px;
+	border-style: dotted;
+	border-width: 2px;
+	background-color: lightgrey;
+	width:200px;
+	height:200px;
+}
+
+.receipt{
+	left: 15px;
+	position: relative;
+	padding: 10px;
+	border-style: dotted;
+	border-width: 2px;
+	width:150px;
+	height:150px;
 }
 
 .tabContent {
@@ -47,15 +90,15 @@ overflow:hidden
 }
 
 .tabBar li{
-float:left
+	float:left
 }
 
 .tabBar li a{
-display:block;
-padding:8px 16px
+	display:block;
+	padding:8px 16px
 }
 
 
 .tabBar a{
-text-decoration:none!important
+	text-decoration:none!important
 }

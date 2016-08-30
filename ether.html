@@ -5,9 +5,9 @@
     <title>Ethereum Blockchain Explorer</title>
     <link rel="stylesheet" type="text/css" href="css/theme.css">
     <script src="src/ui/ui.js"></script>
-    <script type="text/javascript" src="src/lib/bignumber.js"></script>
-    <script type="text/javascript" src="src/lib/web3-light.js"></script>
-    <script type="text/javascript">
+    <script src="src/lib/bignumber.js"></script>
+    <script src="src/lib/web3-light.js"></script>
+    <script>
         var Web3 = require('web3');
         var web3 = (typeof web3 === 'undefined' ? new Web3() : web3)
 
@@ -40,51 +40,73 @@
     </script>
 </head>
 <body>
-    <div class="top">
-        <input type="button" onclick="watchBalance();" value="watch balance" />
-        <div class="left">
-            <label for="option-from">Address:</label>
-            <div id="option-from">Not connected</div>
-            <div>Transactions:</div>
-            <div>Balance:</div>
-        </div>
-        <div id="stats" class="center"></div>
-        <div id="graph" class="right"></div>
-    </div>
-    <div class="middle">
-        <div class="left">
-        </div>
-        <div class="center">
-        </div>
-        <div class="right">
-        </div>
-    </div>
-    <div class="bottom">
-        <ul class="tabBar">
-            <li><a href="#" class="tabLink black red" onclick="openTab(event, 'Code')">Code</a></li>
-            <li><a href="#" class="tabLink black" onclick="openTab(event, 'ABI')">ABI</a></li>
-            <li><a href="#" class="tabLink black" onclick="openTab(event, 'ASM')">ASM</a></li>
-            <li><a href="#" class="tabLink black" onclick="openTab(event, 'Search')">Search</a></li>
-            <li><a href="#" class="tabLink black" onclick="openTab(event, 'Export')">Export</a></li>
-        </ul>
-        <div id="Code" class="tabContent selectedTab">
-            <div>Code</div>
-        </div>
-        <div id="ABI" class="tabContent">
-            <div>ABI</div>
-        </div>
-        <div id="ASM" class="tabContent">
-            <div>ASM</div>
-        </div>
-        <div id="Search" class="tabContent">
-            <div>Search</div>
-        </div>
-        <div id="Export" class="tabContent">
-            <div>Export</div>
-        </div>
-        <div id="coinbase"></div>
-        <div id="original"></div>
-        <div id="current"></div>
-        <div id="diff"></div>
+	<input type="button" onclick="watchBalance();" value="watch balance" />
+	<div class="top">
+		<div class="left">
+            		<label for="option-from">Address:</label>
+           		<div>Transactions:</div>
+            		<div>Balance:</div>
+        	</div>
+		<div id="stats" class="center">
+			<div id="option-from">Not connected</div>
+		</div>
+        	<div id="graph" class="right">&nbsp;</div>
+    	</div>
+    	<div class="middle">
+		<div class="left">
+			<div class="block">
+				<div>Block 634</div>
+			</div>
+		</div>
+		<div class="center">
+			<div class="block">
+				<div>&lt; Block 789 &gt;</div>
+				<div class="block">
+					<div>Tx 0x2ea2bacf</div>
+					<div class="block">
+						<div>Receipt 7</div>
+						<div class="receipt">Receipt stuff blah blah blah</div>
+					</div>
+				</div>
+			</div>
+        	</div>
+		<div class="right">
+			<div class="pendingBlock">
+				<div>Pending Block 1031</div>
+				<ul>
+					<li>18 secs</li>
+					<li>Difficulty 12345</li>
+					<li>57 tvs</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="bottom">
+        	<ul class="tabBar">
+            		<li><a href="#" class="tabLink black red" onclick="openTab(event, 'Code')">Code</a></li>
+            		<li><a href="#" class="tabLink black" onclick="openTab(event, 'ABI')">ABI</a></li>
+            		<li><a href="#" class="tabLink black" onclick="openTab(event, 'ASM')">ASM</a></li>
+            		<li><a href="#" class="tabLink black" onclick="openTab(event, 'Search')">Search</a></li>
+            		<li><a href="#" class="tabLink black" onclick="openTab(event, 'Export')">Export</a></li>
+        	</ul>
+        	<div id="Code" class="tabContent selectedTab">
+            		<div>Code</div>
+       		</div>
+        	<div id="ABI" class="tabContent">
+            		<div>ABI</div>
+        	</div>
+        	<div id="ASM" class="tabContent">
+            		<div>ASM</div>
+        	</div>
+        	<div id="Search" class="tabContent">
+            		<div>Search</div>
+        	</div>
+       		<div id="Export" class="tabContent">
+            		<div>Export</div>
+        	</div>
+        	<div id="coinbase"></div>
+        	<div id="original"></div>
+        	<div id="current"></div>
+        	<div id="diff"></div>
     </div>
 </body>
