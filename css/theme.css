@@ -1,0 +1,61 @@
+body {
+}
+
+.top {
+}
+
+.middle {
+}
+
+.bottom {
+}
+
+.left {
+}
+
+.center {
+}
+
+.right {
+}
+
+.tabContent {
+display:none;
+padding:0.01em 16px;
+border:1px solid #ccc!important
+}
+
+.selectedTab {
+display:block !important;
+}
+
+.red, .hover-red:hover{
+color:#fff!important;
+background-color:#f44336!important
+}
+
+.black, .hover-black:hover{
+color:#fff!important;
+background-color:#000
+}
+
+.tabBar {
+list-style-type:none;
+margin:0;
+padding:0;
+overflow:hidden
+}
+
+.tabBar li{
+float:left
+}
+
+.tabBar li a{
+display:block;
+padding:8px 16px
+}
+
+
+.tabBar a{
+text-decoration:none!important
+}
