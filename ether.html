@@ -1,13 +1,97 @@
 ﻿<!DOCTYPE html>
 
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
     <title>TestPage</title>
+    <script type="text/javascript" src="src/lib/bignumber.js"></script>
+    <script type="text/javascript" src="src/lib/web3-light.js"></script>
+    <script type="text/javascript">
+    var Web3 = require('web3');
+    var web3 = (typeof web3 === 'undefined' ? new Web3() : web3)
+
+    var watchBalance = function ()
+    {
+        //var gistId = getParameterByName('GIST_ID')
+        //var address = getParameterByName('ADDRESS')
+        var providerString = ''
+
+        //// set defaults for friendliness
+        //if (!gistId) {
+        //    console.log("gistId valid")
+        //    if (window.location.protocol === "file:") {
+        //        console.log("window.location.protocol === file:")
+        //        // debug
+        //        // gistId = "505534d5a37ffa3a0625"
+        //        gistId = "0e1b884de82d35053a34"
+        //        // address = "0x63f33b08404987648ce2dde79715e14e8b69e4d8"
+        //        address = "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae"
+        //        providerString = 'http://127.0.0.1:8545'
+        //    } else if (window.location.host === 'tgerring.github.io') {
+        //        console.log("window.location.host === 'tgerring.github.io'")
+        //        // public
+        //        gistId = "0e1b884de82d35053a34"
+        //        address = "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae"
+        //    }
+        //}
+
+        //var toAddress = document.getElementById('test')
+        //if (toAddress && address) toAddress.value = address
+
+        
+        // try to connect if not connected
+        if (!web3.currentProvider)
+            web3.setProvider(new web3.providers.HttpProvider(providerString))
+
+        // check if connected
+        //var isConnected = web3.isConnected()
+
+        while (!web3.isConnected())
+        {
+        }
+
+        console.log("CONNECTED!!!!!")
+        // fill in "from accounts"
+        var fromInput = document.getElementById('option-from')
+        fromInput.innerHTML = ''
+        web3.eth.accounts.forEach(function (address)
+        {
+            fromInput.value = address
+            fromInput.innerHTML = address
+        })
+
+
+        var coinbase = web3.eth.coinbase;
+        var originalBalance = web3.eth.getBalance(coinbase).toNumber();
+        document.getElementById('coinbase').innerText = 'coinbase: ' + coinbase;
+        document.getElementById('original').innerText = ' original balance: ' + originalBalance + '    watching...';
+        web3.eth.filter('latest').watch(function() {
+            var currentBalance = web3.eth.getBalance(coinbase).toNumber();
+            document.getElementById("current").innerText = 'current: ' + currentBalance;
+            document.getElementById("diff").innerText = 'diff:    ' + (currentBalance - originalBalance);
+        });
+    }
+
+    //var getParameterByName = function (name) {
+    //    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]")
+    //    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+    //        results = regex.exec(location.search)
+    //    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "))
+    //}
+
+    </script>
 </head>
 <body>
-    <p>Address:</p>
+    <p id ="test">Address:</p>
     <p>Transactions:</p>
     <p>Balance:</p>
+    <h1>coinbase balance</h1>
+    <input type="button" onclick="watchBalance();" value="watch balance"/>
+    <div></div>
+    <label for="option-from">Account:</label>
+    <div id="option-from">Not connected</div>
+    <div id="coinbase">123</div>
+    <div id="original">223</div>
+    <div id="current">12343243</div>
+    <div id="diff">1223423</div>
 </body>
 </html>
