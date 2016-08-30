@@ -1,88 +1,86 @@
 ﻿<!DOCTYPE html>
 
 <head>
- 	<meta charset="utf-8" />
-	<title>Ethereum Blockchain Explorer</title>
-	<link rel="stylesheet" type="text/css" href="css/theme.css">
-	<script src="src/ui/ui.js"></script>
+    <meta charset="utf-8" />
+    <title>Ethereum Blockchain Explorer</title>
+    <link rel="stylesheet" type="text/css" href="css/theme.css">
+    <script src="src/ui/ui.js"></script>
     <script type="text/javascript" src="src/lib/bignumber.js"></script>
     <script type="text/javascript" src="src/lib/web3-light.js"></script>
     <script type="text/javascript">
-    var Web3 = require('web3');
-    var web3 = (typeof web3 === 'undefined' ? new Web3() : web3)
+        var Web3 = require('web3');
+        var web3 = (typeof web3 === 'undefined' ? new Web3() : web3)
 
-    var watchBalance = function ()
-    {
-        var providerString = ''
-   
-        // try to connect if not connected
-        if (!web3.currentProvider)
-            web3.setProvider(new web3.providers.HttpProvider(providerString))
+        var watchBalance = function () {
+            var providerString = ''
 
-        // fill in "from accounts"
-        var fromInput = document.getElementById('option-from')
-        fromInput.innerHTML = ''
-        web3.eth.accounts.forEach(function (address)
-        {
-            fromInput.value = address
-            fromInput.innerHTML = address
-        })
+            // try to connect if not connected
+            if (!web3.currentProvider)
+                web3.setProvider(new web3.providers.HttpProvider(providerString))
+
+            // fill in "from accounts"
+            var fromInput = document.getElementById('option-from')
+            fromInput.innerHTML = ''
+            web3.eth.accounts.forEach(function (address) {
+                fromInput.value = address
+                fromInput.innerHTML = address
+            })
 
 
-        var coinbase = web3.eth.coinbase;
-        var originalBalance = web3.eth.getBalance(coinbase).toNumber();
-        document.getElementById('coinbase').innerHTML = 'coinbase: ' + coinbase;
-        document.getElementById('original').innerHTML = ' original balance: ' + originalBalance + '    watching...';
-        web3.eth.filter('latest').watch(function() {
-            var currentBalance = web3.eth.getBalance(coinbase).toNumber();
-            document.getElementById("current").innerHTML = 'current: ' + currentBalance;
-            document.getElementById("diff").innerHTML = 'diff:    ' + (currentBalance - originalBalance);
-        });
-    }
+            var coinbase = web3.eth.coinbase;
+            var originalBalance = web3.eth.getBalance(coinbase).toNumber();
+            document.getElementById('coinbase').innerHTML = 'coinbase: ' + coinbase;
+            document.getElementById('original').innerHTML = ' original balance: ' + originalBalance + '    watching...';
+            web3.eth.filter('latest').watch(function () {
+                var currentBalance = web3.eth.getBalance(coinbase).toNumber();
+                document.getElementById("current").innerHTML = 'current: ' + currentBalance;
+                document.getElementById("diff").innerHTML = 'diff:    ' + (currentBalance - originalBalance);
+            });
+        }
     </script>
 </head>
 <body>
-	<div class="top">
-        <input type="button" onclick="watchBalance();" value="watch balance"/>
-		<div class="left">
+    <div class="top">
+        <input type="button" onclick="watchBalance();" value="watch balance" />
+        <div class="left">
             <label for="option-from">Address:</label>
             <div id="option-from">Not connected</div>
-			<div>Transactions:</div>
-			<div>Balance:</div>
-		</div>
-		<div id="stats" class="center"></div>
-		<div id="graph" class="right"></div>
-	</div>
-	<div class="middle">
-		<div class="left">
-		</div>
-		<div class="center">
-		</div>
-		<div class="right">
-		</div>
-	</div>
-	<div class="bottom">
-		<ul class="tabBar">
-			<li><a href="#" class="tabLink black red" onclick="openTab(event, 'Code')">Code</a></li>
-			<li><a href="#" class="tabLink black" onclick="openTab(event, 'ABI')">ABI</a></li>
-			<li><a href="#" class="tabLink black" onclick="openTab(event, 'ASM')">ASM</a></li>
-			<li><a href="#" class="tabLink black" onclick="openTab(event, 'Search')">Search</a></li>
-			<li><a href="#" class="tabLink black" onclick="openTab(event, 'Export')">Export</a></li>
-		</ul>
-		<div id="Code" class="tabContent selectedTab">
-			<div>Code</div>
-		</div>
-		<div id="ABI" class="tabContent">
-			<div>ABI</div>
-		</div>
-		<div id="ASM" class="tabContent">
-			<div>ASM</div>
-		</div>
-		<div id="Search" class="tabContent">
-			<div>Search</div>
-		</div>
-		<div id="Export" class="tabContent">
-			<div>Export</div>
+            <div>Transactions:</div>
+            <div>Balance:</div>
+        </div>
+        <div id="stats" class="center"></div>
+        <div id="graph" class="right"></div>
+    </div>
+    <div class="middle">
+        <div class="left">
+        </div>
+        <div class="center">
+        </div>
+        <div class="right">
+        </div>
+    </div>
+    <div class="bottom">
+        <ul class="tabBar">
+            <li><a href="#" class="tabLink black red" onclick="openTab(event, 'Code')">Code</a></li>
+            <li><a href="#" class="tabLink black" onclick="openTab(event, 'ABI')">ABI</a></li>
+            <li><a href="#" class="tabLink black" onclick="openTab(event, 'ASM')">ASM</a></li>
+            <li><a href="#" class="tabLink black" onclick="openTab(event, 'Search')">Search</a></li>
+            <li><a href="#" class="tabLink black" onclick="openTab(event, 'Export')">Export</a></li>
+        </ul>
+        <div id="Code" class="tabContent selectedTab">
+            <div>Code</div>
+        </div>
+        <div id="ABI" class="tabContent">
+            <div>ABI</div>
+        </div>
+        <div id="ASM" class="tabContent">
+            <div>ASM</div>
+        </div>
+        <div id="Search" class="tabContent">
+            <div>Search</div>
+        </div>
+        <div id="Export" class="tabContent">
+            <div>Export</div>
         </div>
         <div id="coinbase"></div>
         <div id="original"></div>
