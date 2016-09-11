@@ -8,105 +8,167 @@
     <script src="src/lib/bignumber.js"></script>
     <script src="src/lib/web3-light.js"></script>
     <script>
-        var Web3 = require('web3');
-        var web3 = (typeof web3 === 'undefined' ? new Web3() : web3)
+        var web3 = (typeof web3 === 'undefined' ? new Web3(new Web3.providers.HttpProvider("http://localhost:8545")) : web3)
 
-        var watchBalance = function () {
-            var providerString = ''
+        window.onload = function ()
+        {
+            var providerString = '';
 
             // try to connect if not connected
             if (!web3.currentProvider)
-                web3.setProvider(new web3.providers.HttpProvider(providerString))
+                web3.setProvider(new web3.providers.HttpProvider(providerString));
 
             // fill in "from accounts"
-            var fromInput = document.getElementById('option-from')
-            fromInput.innerHTML = ''
-            web3.eth.accounts.forEach(function (address) {
-                fromInput.value = address
-                fromInput.innerHTML = address
+            var fromInput = document.getElementById('option-from');
+            var counter = 0;
+            web3.eth.accounts.forEach(function (address)
+            {
+                counter++;
+                var option = document.createElement('option')
+                option.value = address
+                option.innerHTML = address
+                fromInput.options.add(option)
+                fromInput.selectedIndex = counter;
             })
 
+            fromInput.disabled = false;
 
-            var coinbase = web3.eth.coinbase;
-            var originalBalance = web3.eth.getBalance(coinbase).toNumber();
-            document.getElementById('coinbase').innerHTML = 'coinbase: ' + coinbase;
-            document.getElementById('original').innerHTML = ' original balance: ' + originalBalance + '    watching...';
-            web3.eth.filter('latest').watch(function () {
-                var currentBalance = web3.eth.getBalance(coinbase).toNumber();
-                document.getElementById("current").innerHTML = 'current: ' + currentBalance;
-                document.getElementById("diff").innerHTML = 'diff:    ' + (currentBalance - originalBalance);
+            var latestBlock = document.getElementById("latest-block");
+            var prevBlock = document.getElementById("previous-block");
+
+            latestBlock.innerHTML = "Current Block = " + web3.eth.blockNumber;
+            prevBlock.innerHTML = "Previous Block = " + web3.eth.blockNumber;
+
+            UpdateCurrAddressInfo();
+        }
+
+        var PrintLatestBlock = function ()
+        {
+            var latestBlock = document.getElementById("latest-block");
+            var prevBlock = document.getElementById("previous-block");
+            var time = document.getElementById("time");
+
+            prevBlock.innerHTML = "Previous Block = " + latestBlock.innerHTML.replace("Current Block = ", "");
+
+            web3.eth.getBlockNumber(function (err, block)
+            {
+                var date = new Date();
+                time.innerHTML = GetCurrentTime();
+                latestBlock.innerHTML = "Current Block = " + block;
             });
         }
+
+        var GetCurrentTime = function ()
+        {
+            var date = new Date();
+            return date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+        }
+
+        var UpdateCurrAddressInfo = function()
+        {
+            var fromInput = document.getElementById('option-from');
+
+            var transDocEle = document.getElementById("trans");
+            var currAddress = fromInput.options[fromInput.selectedIndex].innerHTML;
+            if (currAddress !== "Not connected")
+            {
+                transDocEle.innerHTML = "Transactions: " + web3.eth.getTransactionCount(currAddress);
+
+                var ogBalanceInWei = web3.eth.getBalance(currAddress).toNumber();
+                var ogBalance = web3.fromWei(ogBalanceInWei, 'ether');
+
+                document.getElementById('original').innerHTML = ' original balance: ' + ogBalance + '  watching...';
+                web3.eth.filter('latest').watch(function (err, hash)
+                {
+                    if (!err)
+                    {
+                        var currBalanceInWei = web3.eth.getBalance(currAddress).toNumber();
+                        var currBalance = web3.fromWei(currBalanceInWei, 'ether');
+                        document.getElementById("current").innerHTML = 'current: ' + currBalance;
+                        document.getElementById("diff").innerHTML = 'diff:    ' + (currBalance - ogBalance);
+                        document.getElementById("timer").innerHTML = GetCurrentTime();
+                    }
+                    else
+                    {
+                        console.error(err);
+                    }
+                });
+            }
+        }
+
     </script>
 </head>
 <body>
-	<input type="button" onclick="watchBalance();" value="watch balance" />
-	<div class="top">
-		<div class="left">
-            		<label for="option-from">Address:</label>
-           		<div>Transactions:</div>
-            		<div>Balance:</div>
-        	</div>
-		<div id="stats" class="center">
-			<div id="option-from">Not connected</div>
-		</div>
-        	<div id="graph" class="right">&nbsp;</div>
-    	</div>
-    	<div class="middle">
-		<div class="left">
-			<div class="block">
-				<div>Block 634</div>
-			</div>
-		</div>
-		<div class="center">
-			<div class="block">
-				<div>&lt; Block 789 &gt;</div>
-				<div class="block">
-					<div>Tx 0x2ea2bacf</div>
-					<div class="block">
-						<div>Receipt 7</div>
-						<div class="receipt">Receipt stuff blah blah blah</div>
-					</div>
-				</div>
-			</div>
-        	</div>
-		<div class="right">
-			<div class="pendingBlock">
-				<div>Pending Block 1031</div>
-				<ul>
-					<li>18 secs</li>
-					<li>Difficulty 12345</li>
-					<li>57 tvs</li>
-				</ul>
-			</div>
-		</div>
-	</div>
-	<div class="bottom">
-        	<ul class="tabBar">
-            		<li><a href="#" class="tabLink black red" onclick="openTab(event, 'Code')">Code</a></li>
-            		<li><a href="#" class="tabLink black" onclick="openTab(event, 'ABI')">ABI</a></li>
-            		<li><a href="#" class="tabLink black" onclick="openTab(event, 'ASM')">ASM</a></li>
-            		<li><a href="#" class="tabLink black" onclick="openTab(event, 'Search')">Search</a></li>
-            		<li><a href="#" class="tabLink black" onclick="openTab(event, 'Export')">Export</a></li>
-        	</ul>
-        	<div id="Code" class="tabContent selectedTab">
-            		<div>Code</div>
-       		</div>
-        	<div id="ABI" class="tabContent">
-            		<div>ABI</div>
-        	</div>
-        	<div id="ASM" class="tabContent">
-            		<div>ASM</div>
-        	</div>
-        	<div id="Search" class="tabContent">
-            		<div>Search</div>
-        	</div>
-       		<div id="Export" class="tabContent">
-            		<div>Export</div>
-        	</div>
-        	<div id="coinbase"></div>
-        	<div id="original"></div>
-        	<div id="current"></div>
-        	<div id="diff"></div>
+    <div class="top">
+        <div class="left">
+            <label for="option-from">Address:</label>
+            <select onchange="UpdateCurrAddressInfo()" id="option-from" disabled>
+                <option>Not connected</option>
+            </select>
+            <div id="trans"></div>
+            <div id="original"></div>
+            <div id="current"></div>
+            <div id="diff"></div>
+            <div id="timer"></div>
+        </div>
+        <div id="stats" class="center">
+        </div>
+        <div id="graph" class="right">&nbsp;</div>
+    </div>
+    <div class="middle">
+        <div class="left">
+            <div class="block">
+                <div id="latest-block" >Block 634</div>
+                <div id="previous-block">Block 634</div>
+                <div id="time"></div>
+                <script>setInterval(PrintLatestBlock, 1000);</script>
+            </div>
+        </div>
+        <div class="center">
+            <div class="block">
+                <div>&lt; Block 789 &gt;</div>
+                <div class="block">
+                    <div>Tx 0x2ea2bacf</div>
+                    <div class="block">
+                        <div>Receipt 7</div>
+                        <div class="receipt">Receipt stuff blah blah blah</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="right">
+            <div class="pendingBlock">
+                <div>Pending Block 1031</div>
+                <ul>
+                    <li>18 secs</li>
+                    <li>Difficulty 12345</li>
+                    <li>57 tvs</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <ul class="tabBar">
+            <li><a href="#" class="tabLink black red" onclick="openTab(event, 'Code')">Code</a></li>
+            <li><a href="#" class="tabLink black" onclick="openTab(event, 'ABI')">ABI</a></li>
+            <li><a href="#" class="tabLink black" onclick="openTab(event, 'ASM')">ASM</a></li>
+            <li><a href="#" class="tabLink black" onclick="openTab(event, 'Search')">Search</a></li>
+            <li><a href="#" class="tabLink black" onclick="openTab(event, 'Export')">Export</a></li>
+        </ul>
+        <div id="Code" class="tabContent selectedTab">
+            <div>Code</div>
+        </div>
+        <div id="ABI" class="tabContent">
+            <div>ABI</div>
+        </div>
+        <div id="ASM" class="tabContent">
+            <div>ASM</div>
+        </div>
+        <div id="Search" class="tabContent">
+            <div>Search</div>
+        </div>
+        <div id="Export" class="tabContent">
+            <div>Export</div>
+        </div>
     </div>
 </body>
