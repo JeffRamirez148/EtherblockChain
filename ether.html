@@ -8,7 +8,9 @@
     <script src="src/lib/bignumber.js"></script>
     <script src="src/lib/web3-light.js"></script>
     <script>
-        var web3 = (typeof web3 === 'undefined' ? new Web3(new Web3.providers.HttpProvider("http://localhost:8545")) : web3)
+        var web3 = (typeof web3 === 'undefined' ? new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/MEDIUMTUTORIAL")) : web3)
+        var maxBlockCount = 6;
+        var addedDivs = [];
 
         window.onload = function ()
         {
@@ -16,7 +18,7 @@
 
             // try to connect if not connected
             if (!web3.currentProvider)
-                web3.setProvider(new web3.providers.HttpProvider(providerString));
+                web3.setProvider(new web3.providers.HttpProvider("https://mainnet.infura.io/MEDIUMTUTORIAL"));
 
             // fill in "from accounts"
             var fromInput = document.getElementById('option-from');
@@ -29,33 +31,124 @@
                 option.innerHTML = address
                 fromInput.options.add(option)
                 fromInput.selectedIndex = counter;
+                fromInput.disabled = false;
             })
 
-            fromInput.disabled = false;
-
-            var latestBlock = document.getElementById("latest-block");
-            var prevBlock = document.getElementById("previous-block");
-
-            latestBlock.innerHTML = "Current Block = " + web3.eth.blockNumber;
-            prevBlock.innerHTML = "Previous Block = " + web3.eth.blockNumber;
+            var transactionsBlock = document.getElementById("transactions");
+            transactionsBlock.style.display = "none";
 
             UpdateCurrAddressInfo();
+            PopulateCurrentBlocks();
+        }
+
+        var PopulateCurrentBlocks = function ()
+        {
+            var curBlocks = [];
+
+            for (var i = 0; i < maxBlockCount; i++)
+            {
+                var name = "block" + (i + 1) + "-tab";
+                curBlocks[i] = document.getElementById(name);
+            }
+
+            var curBlock = web3.eth.blockNumber;
+
+            for (var i = 0; i < maxBlockCount; i++)
+            {
+                curBlocks[i].innerHTML = curBlock;
+                curBlock--;
+            }
         }
 
         var PrintLatestBlock = function ()
         {
-            var latestBlock = document.getElementById("latest-block");
-            var prevBlock = document.getElementById("previous-block");
+            var curBlocks = [];
+
+            for (var i = 0; i < maxBlockCount; i++)
+            {
+                var name = "block" + (i + 1) + "-tab";
+                curBlocks[i] = document.getElementById(name);
+            }
+
             var time = document.getElementById("time");
 
-            prevBlock.innerHTML = "Previous Block = " + latestBlock.innerHTML.replace("Current Block = ", "");
+            var blockData = web3.eth.getBlock("latest", true);
 
-            web3.eth.getBlockNumber(function (err, block)
+            var date = new Date();
+            time.innerHTML = GetCurrentTime();
+
+            var CurrBlock = blockData.number;
+            var PreviousBlock = parseInt(curBlocks[0].innerHTML);
+            if (CurrBlock !== PreviousBlock)
             {
-                var date = new Date();
-                time.innerHTML = GetCurrentTime();
-                latestBlock.innerHTML = "Current Block = " + block;
-            });
+                for (var i = 0; i < maxBlockCount; i++)
+                {
+                    PreviousBlock = curBlocks[i].innerHTML;
+                    curBlocks[i].innerHTML = CurrBlock;
+                    CurrBlock = PreviousBlock;
+                }
+                displayCurrBlockInfo(blockData);
+            }
+        }
+
+        var displayCurrBlockInfo = function (curBlockData)
+        {
+            var current = document.getElementById("current-block");
+            var hash = document.getElementById("hash-block");
+            var miner = document.getElementById("miner-block");
+            var gasUse = document.getElementById("gas-use-block");
+            var gasLimit = document.getElementById("gas-limit-block");
+            var timestamp = document.getElementById("timestap-block");
+            var transactionsCount = document.getElementById("transactions-count-block");
+            var transactions = document.getElementById("transactions-block");
+            var transactionsBlock = document.getElementById("transactions");
+
+            current.innerHTML = "Block " + curBlockData.number;
+            hash.innerHTML = "Hash = " + curBlockData.hash;
+            miner.innerHTML = "Miner = " + curBlockData.miner;
+            gasUse.innerHTML = "Gas Used = " + curBlockData.gasUsed;
+            gasLimit.innerHTML = "Gas Limit = " + curBlockData.gasLimit;
+            timestamp.innerHTML = "Timestamp = " + curBlockData.timestamp;
+            var numOfTrans = curBlockData.transactions.length;
+            transactionsCount.innerHTML = "Transaction Count = " + numOfTrans;
+
+            if (addedDivs.length > 0)
+            {
+                for (var i = 0; i < addedDivs.length; i++)
+                {
+                    transactions.removeChild(addedDivs[i]);
+                }
+                addedDivs = [];
+            }
+
+            if (numOfTrans > 0)
+            {
+                transactionsBlock.style.display = "inherit";
+                transactions.innerHTML = "Transactions";
+                for(var i = 0; i < numOfTrans; i++)
+                {
+                    var from = document.createElement('div');
+                    from.id = "from"+i;
+                    from.innerHTML = "From: " + curBlockData.transactions[i].from;
+                    var to = document.createElement('div');
+                    to.id = "to"+i;
+                    to.innerHTML = "To: " +curBlockData.transactions[i].to;
+                    var gas = document.createElement('div');
+                    gas.id = "gas"+i;
+                    gas.innerHTML = "Gas: " +curBlockData.transactions[i].gas;
+
+                    addedDivs.push(from);
+                    addedDivs.push(to);
+                    addedDivs.push(gas);
+                    transactions.appendChild(from);
+                    transactions.appendChild(to);
+                    transactions.appendChild(gas);
+                }
+            }
+            else
+            {
+                transactionsBlock.style.display = "none";
+            }
         }
 
         var GetCurrentTime = function ()
@@ -64,7 +157,7 @@
             return date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
         }
 
-        var UpdateCurrAddressInfo = function()
+        var UpdateCurrAddressInfo = function ()
         {
             var fromInput = document.getElementById('option-from');
 
@@ -96,6 +189,55 @@
             }
         }
 
+        function printAccountBalance()
+        {
+            var GET = {};
+            var query = window.location.search.substring(1).split("&");
+            for (var i = 0, max = query.length; i < max; i++)
+            {
+                if (query[i] === "") // check for trailing & with no param
+                    continue;
+                var param = query[i].split("=");
+                GET[decodeURIComponent(param[0])] = decodeURIComponent(param[1] || "");
+            }
+            var currAddress = GET.account;
+
+            if (currAddress !== undefined)
+            {
+                var fromInput = document.getElementById('option-from');
+
+                var option = document.createElement('option');
+                option.value = currAddress;
+                option.innerHTML = currAddress;
+                fromInput.options.add(option);
+                fromInput.selectedIndex = 1;
+
+                fromInput.disabled = false;
+
+                var transDocEle = document.getElementById("trans");
+                transDocEle.innerHTML = "Transactions: " + web3.eth.getTransactionCount(currAddress);
+
+                var ogBalanceInWei = web3.eth.getBalance(currAddress).toNumber();
+                var ogBalance = web3.fromWei(ogBalanceInWei, 'ether');
+
+                document.getElementById('original').innerHTML = ' original balance: ' + ogBalance + '  watching...';
+                web3.eth.filter('latest').watch(function (err, hash)
+                {
+                    if (!err)
+                    {
+                        var currBalanceInWei = web3.eth.getBalance(currAddress).toNumber();
+                        var currBalance = web3.fromWei(currBalanceInWei, 'ether');
+                        document.getElementById("current").innerHTML = 'current: ' + currBalance;
+                        document.getElementById("diff").innerHTML = 'diff:    ' + (currBalance - ogBalance);
+                        document.getElementById("timer").innerHTML = GetCurrentTime();
+                    }
+                    else
+                    {
+                        console.error(err);
+                    }
+                });
+            }
+        }
     </script>
 </head>
 <body>
@@ -105,46 +247,45 @@
             <select onchange="UpdateCurrAddressInfo()" id="option-from" disabled>
                 <option>Not connected</option>
             </select>
-            <div id="trans"></div>
-            <div id="original"></div>
-            <div id="current"></div>
-            <div id="diff"></div>
-            <div id="timer"></div>
+            <form method="GET" action="ether.html">
+                Enter an account:
+                <input type="text" size="50" name="account"><input type="submit">
+            </form>
         </div>
         <div id="stats" class="center">
         </div>
         <div id="graph" class="right">&nbsp;</div>
+        <div class="fullWidth">
+            <ul class="tabBar">
+                <li><a href="#" class="tabLink black red" onclick="openTab(event, 'block1')" id="block1-tab"></a></li>
+                <li><a href="#" class="tabLink black" onclick="openTab(event, 'block2')" id="block2-tab"></a></li>
+                <li><a href="#" class="tabLink black" onclick="openTab(event, 'block3')" id="block3-tab"></a></li>
+                <li><a href="#" class="tabLink black" onclick="openTab(event, 'block4')" id="block4-tab"></a></li>
+                <li><a href="#" class="tabLink black" onclick="openTab(event, 'block5')" id="block5-tab"></a></li>
+                <li><a href="#" class="tabLink black" onclick="openTab(event, 'block6')" id="block6-tab"></a></li>
+            </ul>
+            <div id="block1" class="tabContent"></div>
+            <div id="block2" class="tabContent"></div>
+            <div id="block3" class="tabContent"></div>
+            <div id="block4" class="tabContent"></div>
+            <div id="block5" class="tabContent"></div>
+            <div id="block6" class="tabContent"></div>
+        </div>
     </div>
     <div class="middle">
-        <div class="left">
-            <div class="block">
-                <div id="latest-block" >Block 634</div>
-                <div id="previous-block">Block 634</div>
-                <div id="time"></div>
-                <script>setInterval(PrintLatestBlock, 1000);</script>
-            </div>
+        <div class="block">
+            <div id="current-block"></div>
+            <div id="hash-block"></div>
+            <div id="miner-block"></div>
+            <div id="gas-use-block"></div>
+            <div id="gas-limit-block"></div>
+            <div id="timestap-block"></div>
+            <div id="transactions-count-block"></div>
+            <div id="time"></div>
+            <script>setInterval(PrintLatestBlock, 1000);</script>
         </div>
-        <div class="center">
-            <div class="block">
-                <div>&lt; Block 789 &gt;</div>
-                <div class="block">
-                    <div>Tx 0x2ea2bacf</div>
-                    <div class="block">
-                        <div>Receipt 7</div>
-                        <div class="receipt">Receipt stuff blah blah blah</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="right">
-            <div class="pendingBlock">
-                <div>Pending Block 1031</div>
-                <ul>
-                    <li>18 secs</li>
-                    <li>Difficulty 12345</li>
-                    <li>57 tvs</li>
-                </ul>
-            </div>
+        <div id="transactions" class="block">
+            <div id="transactions-block"></div>
         </div>
     </div>
     <div class="bottom">
@@ -170,5 +311,35 @@
         <div id="Export" class="tabContent">
             <div>Export</div>
         </div>
+        <div class="center">
+            <div class="block">
+                <div>&lt; Block 789 &gt;</div>
+                <div class="block">
+                    <div>Tx 0x2ea2bacf</div>
+                    <div class="block">
+                        <div>Receipt 7</div>
+                        <div class="receipt">Receipt stuff blah blah blah</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="right">
+            <div class="pendingBlock">
+                <div>Pending Block 1031</div>
+                <ul>
+                    <li>18 secs</li>
+                    <li>Difficulty 12345</li>
+                    <li>57 tvs</li>
+                </ul>
+            </div>
+        </div>
+        <div id="trans"></div>
+        <div id="original"></div>
+        <div id="current"></div>
+        <div id="diff"></div>
+        <div id="timer"></div>
+        <script>
+            printAccountBalance();
+		</script>
     </div>
 </body>
